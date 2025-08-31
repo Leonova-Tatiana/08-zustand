@@ -14,8 +14,8 @@ import SearchBox from "@/components/SearchBox/SearchBox";
 import Loader from "@/components/Loader/Loader";
 import ErrorMessage from "@/components/ErrorMassage/ErrorMessage";
 import { Toaster } from "react-hot-toast";
-import NoteForm from "@/components/NoteForm/NoteForm";
-import Modal from "@/components/Modal/Modal";
+
+import Link from "next/link";
 
 interface NotesClientProps {
   tag: string | undefined;
@@ -24,24 +24,20 @@ interface NotesClientProps {
 export default function NotesClient({ tag }: NotesClientProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [isOpen, setIsOpen] = useState(false);
+
   const [debouncedSearch] = useDebounce(search, 300);
 
   const { data, isLoading, isError, isSuccess } = useQuery({
-    queryKey: ["notes", { search: debouncedSearch, page, tag }],
+    queryKey: ["notes", debouncedSearch, page, tag],
     queryFn: () => fetchNotes(debouncedSearch, page, tag),
     placeholderData: keepPreviousData,
   });
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
   const totalPages = data?.totalPages || 0;
-
   const handleSearch = (value: string) => {
     setSearch(value);
     setPage(1);
   };
-
   const handlePageChange = (value: number) => {
     setPage(value);
   };
@@ -50,7 +46,7 @@ export default function NotesClient({ tag }: NotesClientProps) {
     <div className={css.app}>
       <Toaster />
       <header className={css.toolbar}>
-        <SearchBox value={search} onChange={handleSearch} />
+        <SearchBox value={search} onSearch={handleSearch} />
         {isSuccess && data?.totalPages > 1 && (
           <Pagination
             totalPages={totalPages}
@@ -59,18 +55,13 @@ export default function NotesClient({ tag }: NotesClientProps) {
           />
         )}
 
-        <button className={css.button} onClick={openModal}>
+        <Link href="/notes/action/create" className={css.button}>
           Create note +
-        </button>
+        </Link>
       </header>
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
       {isSuccess && data.notes.length > 0 && <NoteList notes={data.notes} />}
-      {isOpen && (
-        <Modal onClose={closeModal}>
-          <NoteForm onClose={closeModal} />
-        </Modal>
-      )}
     </div>
   );
 }

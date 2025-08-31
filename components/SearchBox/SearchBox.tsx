@@ -1,18 +1,20 @@
-import css from "./SearchBox.module.css";
+"use client";
 
-interface SearchBoxProps {
+import React from "react";
+
+export interface SearchBoxProps {
   value: string;
-  onChange: (newValue: string) => void;
+  onSearch: (value: string) => void;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({ value, onChange }) => {
+const SearchBox: React.FC<SearchBoxProps> = ({ value, onSearch }) => {
   return (
     <input
-      className={css.input}
       type="text"
-      placeholder="Search notes"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onSearch(e.target.value)}
+      placeholder="Search notes..."
+      className="border px-3 py-2 rounded w-full"
     />
   );
 };
